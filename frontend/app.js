@@ -160,7 +160,7 @@ function sendWhatsApp(phone, name) {
     return;
   }
   const mensaje = encodeURIComponent(`¡Hola ${name}! Te escribimos para pedirte que confirmes tu
-    presencia a nuestro casamiento. Podes contestar el forms o responder este mensajito. Gracias!`);
+    presencia a nuestro casamiento. Podes contestar el forms https://forms.gle/N9zkrHavFwZrsHrF9 o responder este mensajito. Gracias!`);
   window.open(`https://wa.me/${phone}?text=${mensaje}`, '_blank');
 }
 
