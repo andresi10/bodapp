@@ -7,7 +7,6 @@ const GROUPS = [
   'Amigos en común','Trabajo novia','Trabajo novio','Otros'
 ];
 
-// Íconos finos (Stroke 1.5)
 const ICONS = {
     trash: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
     edit: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
@@ -19,10 +18,12 @@ let guests = [];
 let activeFilter = 'Todos';
 let pendingDelete = null;
 let editingId = null;
+let isFetching = true; // Controla el estado de carga
 
 // ─── INIT ───
 document.addEventListener("DOMContentLoaded", () => {
-  loadGuests();
+  render(); // Dibuja la estructura base y los filtros al instante
+  loadGuests(); // Va a buscar los datos
   setupEvents();
 });
 
@@ -35,7 +36,6 @@ function setupEvents() {
   }
 }
 
-// ─── FUNCIONES DE FECHA ───
 function saveDate() {
     const val = document.getElementById('event-date').value;
     const display = document.getElementById('header-date-display');
@@ -46,13 +46,20 @@ function saveDate() {
 
 // ─── COMUNICACIÓN CON LA API (PYTHON) ───
 async function loadGuests() {
+  isFetching = true;
+  renderTable(); // Muestra el cartel de carga
   try {
     const response = await fetch(API_URL);
     if (response.ok) {
       guests = await response.json();
-      render(); 
+      if (!Array.isArray(guests)) guests = []; // Por seguridad
     }
-  } catch (error) { console.error("Error al cargar invitados:", error); }
+  } catch (error) { 
+    console.error("Error al cargar invitados:", error); 
+  } finally {
+    isFetching = false;
+    render(); // Refresca todo con los datos reales
+  }
 }
 
 async function addGuest() {
@@ -320,7 +327,20 @@ function render() {
 function renderTable() {
     const tbody = document.getElementById('guest-tbody');
     if (!tbody) return;
+    
+    // Si la aplicación está esperando al servidor, muestra el cartel
+    if (isFetching) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#718096; padding: 3rem; font-style:italic;">⏳ Despertando al servidor y cargando invitados...</td></tr>`;
+        return;
+    }
+    
     const list = getFilteredGuests();
+    
+    // Si cargó pero la base de datos está vacía
+    if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#718096; padding: 3rem;">No hay invitados cargados todavía. ¡Empezá a agregar arriba!</td></tr>`;
+        return;
+    }
     
     tbody.innerHTML = list.map(g => {
         let dietaHTML = g.dietary ? `<span class="diet-pill">${esc(g.dietary)}</span>` : '';
