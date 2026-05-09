@@ -159,8 +159,8 @@ function sendWhatsApp(phone, name) {
     alert(`No hay un número de teléfono guardado para ${name}.`);
     return;
   }
-  const mensaje = encodeURIComponent(`¡Hola ${name}! Te escribimos para pedirte que confirmes tu
-    presencia a nuestro casamiento. Podes contestar el forms https://forms.gle/N9zkrHavFwZrsHrF9 o responder este mensajito. Gracias!`);
+  const mensaje = encodeURIComponent(`¡Hola ${name}! Te escribimos para pedirte que confirmes tu presencia a nuestro casamiento. Podes contestar el forms https://forms.gle/N9zkrHavFwZrsHrF9 o responder este mensajito. Gracias!
+    Sil y Andy`);
   window.open(`https://wa.me/${phone}?text=${mensaje}`, '_blank');
 }
 
