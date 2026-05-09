@@ -48,7 +48,11 @@ h1 em { font-style: italic; color: var(--gold); }
 
 .add-form-card { background: white; border: 1px solid var(--border); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow); }
 .form-grid-main { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-.form-grid-secondary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+.form-grid-secondary { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 1.5rem; 
+}
 @media (max-width: 768px) {
   .form-grid-main, .form-grid-secondary { grid-template-columns: 1fr; gap: 1rem; }
 }
