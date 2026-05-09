@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lista de Invitados — Casamiento</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-  <script src="app.js"></script>
+  <link rel="stylesheet" href="styles.css?v=2">
+  <script src="app.js?v=2"></script>
 </head>
 <body>
 
@@ -45,7 +45,7 @@
     <div class="section-line"></div>
   </div>
 
-<div class="add-form-card no-print">
+  <div class="add-form-card no-print">
     <div class="form-grid-main">
       <div class="field-group">
         <span class="field-label">Nombre completo</span>
@@ -92,7 +92,9 @@
         <span class="field-label">Notas</span>
         <input type="text" id="inp-notes" placeholder="Observaciones…" />
       </div>
-    </div> <div style="display: flex; justify-content: center; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+    </div>
+    
+    <div style="display: flex; justify-content: center; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
       <button class="btn-add" id="btn-add-main" onclick="addGuest()" style="padding: 12px 40px; min-width: 250px; font-size: 15px;">+ Agregar invitado</button>
     </div>
   </div>
@@ -116,3 +118,48 @@
         <option value="rsvp">Estado reserva</option>
       </select>
     </div>
+  </div>
+
+  <div class="filter-pills no-print" id="filter-pills" style="margin-bottom: 1rem;"></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Invitado</th>
+          <th>Grupo</th>
+          <th>Estado de reserva</th>
+          <th class="hide-mobile">Dieta</th>
+          <th class="hide-mobile">Notas</th>
+          <th class="no-print" style="width:100px;"></th>
+        </tr>
+      </thead>
+      <tbody id="guest-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="section-header">
+    <span class="section-title">Progreso por grupo</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="progress-grid" id="progress-grid"></div>
+
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3>¿Eliminar invitado?</h3>
+    <p id="modal-msg">Esta acción no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="confirmDelete()">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<footer class="app-footer">
+  <span>♡</span> &nbsp; Lista guardada en servidor seguro &nbsp; <span>♡</span>
+</footer>
+</body>
+</html>
