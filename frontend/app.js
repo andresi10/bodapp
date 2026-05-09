@@ -374,12 +374,28 @@ function renderTable() {
 function updateStats() {
   const container = document.getElementById('stats-grid');
   if (!container) return;
-  const total = guests.length;
-  const conf = guests.filter(g => g.rsvp === 'confirmed').length;
-  const pend = guests.filter(g => g.rsvp === 'pending').length;
-  const dec = guests.filter(g => g.rsvp === 'declined').length;
+  
+  let total = 0;
+  let conf = 0;
+  let pend = 0;
+  let dec = 0;
+
+  // Recorremos cada invitado y contamos si trae acompañante
+  guests.forEach(g => {
+    // Por defecto es 1 persona. Si el campo 'plus' tiene texto, son 2.
+    let heads = 1;
+    if (g.plus && g.plus.trim() !== "") {
+        heads = 2;
+    }
+
+    total += heads;
+    if (g.rsvp === 'confirmed') conf += heads;
+    if (g.rsvp === 'pending') pend += heads;
+    if (g.rsvp === 'declined') dec += heads;
+  });
+
   container.innerHTML = `
-    <div class="stat-card"><h3>${total}</h3><p>Total</p></div>
+    <div class="stat-card"><h3>${total}</h3><p>Total Personas</p></div>
     <div class="stat-card"><h3>${conf}</h3><p>Confirmados</p></div>
     <div class="stat-card"><h3>${pend}</h3><p>Pendientes</p></div>
     <div class="stat-card"><h3>${dec}</h3><p>Cancelados</p></div>
