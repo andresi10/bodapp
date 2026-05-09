@@ -1,12 +1,12 @@
-import json
-import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
+from pymongo import MongoClient
+from typing import Optional
 
 app = FastAPI()
 
+# Configuración de CORS para que tu frontend pueda hablar con el backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,57 +15,60 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Archivo donde se guardarán los datos permanentemente
-DATABASE_FILE = "invitados.json"
+# ─── CONEXIÓN A MONGODB ───
+# ¡IMPORTANTE! Reemplazá TU_CONTRASEÑA_ACA por la contraseña real que creaste en Atlas
+MONGO_URI = "mongodb+srv://andresiDB:Mermelada10.@cluster0.inbswie.mongodb.net/?appName=Cluster0"
 
+# Nos conectamos al cluster
+client = MongoClient(MONGO_URI)
+# Creamos/Seleccionamos la base de datos "bodapp"
+db = client["bodapp"]
+# Creamos/Seleccionamos la tabla (colección) "invitados"
+coleccion_invitados = db["invitados"]
+
+# ─── MODELO DE DATOS ───
 class Invitado(BaseModel):
     id: int
     name: str
     group: str
     rsvp: str
-    dietary: str = ""
-    phone: Optional[str] = ""
-    plus: Optional[str] = ""
-    notes: Optional[str] = ""
+    dietary: str
+    phone: str
+    plus: str
+    notes: str
 
-# --- FUNCIONES DE AYUDA PARA EL ARCHIVO ---
+# ─── RUTAS CRUD ───
 
-def cargar_datos() -> List[dict]:
-    if not os.path.exists(DATABASE_FILE):
-        return []
-    with open(DATABASE_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-def guardar_datos(datos: List[dict]):
-    with open(DATABASE_FILE, "w", encoding="utf-8") as f:
-        json.dump(datos, f, indent=4, ensure_ascii=False)
-
-# --- RUTAS DE LA API ---
-
+# 1. LEER TODOS
 @app.get("/api/invitados")
-def obtener_invitados():
-    return cargar_datos()
+def get_invitados():
+    # Buscamos todos los invitados y excluimos el ID interno de Mongo (_id)
+    invitados = list(coleccion_invitados.find({}, {"_id": 0}))
+    return invitados
 
+# 2. CREAR
 @app.post("/api/invitados")
-def agregar_invitado(invitado: Invitado):
-    invitados = cargar_datos()
-    invitados.append(invitado.model_dump())
-    guardar_datos(invitados)
-    return {"mensaje": "Invitado guardado"}
+def add_invitado(invitado: Invitado):
+    nuevo_invitado = invitado.dict()
+    coleccion_invitados.insert_one(nuevo_invitado)
+    return {"mensaje": "Invitado guardado en MongoDB exitosamente"}
 
-@app.put("/api/invitados/{id_invitado}")
-def actualizar_invitado(id_invitado: int, datos: dict):
-    invitados = cargar_datos()
-    for invitado in invitados:
-        if invitado["id"] == id_invitado:
-            invitado.update(datos)
-            guardar_datos(invitados)
-            return {"mensaje": "Actualizado"}
-    raise HTTPException(status_code=404, detail="No encontrado")
+# 3. ACTUALIZAR (Modificar estado o editar)
+@app.put("/api/invitados/{invitado_id}")
+def update_invitado(invitado_id: int, datos_nuevos: dict):
+    # Buscamos por tu 'id' numérico y le inyectamos los datos nuevos
+    resultado = coleccion_invitados.update_one(
+        {"id": invitado_id}, 
+        {"$set": datos_nuevos}
+    )
+    if resultado.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Invitado no encontrado")
+    return {"mensaje": "Invitado actualizado en MongoDB"}
 
-@app.delete("/api/invitados/{id_invitado}")
-def eliminar_invitado(id_invitado: int):
-    invitados = cargar_datos()
-    nuevos_invitados = [g for g in invitados if g["id"] != id_invitado]
-    guardar_datos(nuevos_invitados)
-    return {"mensaje": "Eliminado"}
+# 4. BORRAR
+@app.delete("/api/invitados/{invitado_id}")
+def delete_invitado(invitado_id: int):
+    resultado = coleccion_invitados.delete_one({"id": invitado_id})
+    if resultado.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Invitado no encontrado")
+    return {"mensaje": "Invitado eliminado de MongoDB"}
